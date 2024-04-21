@@ -1,5 +1,6 @@
 import argparse
 import torch
+import yaml
 
 from models.common import DetectMultiBackend
 from models.yolo import Model
@@ -146,5 +147,12 @@ if __name__ == "__main__":
                 # Save results (image with detections)
                 cv2.imwrite(save_path, im0)
                 break
+
+        nc, anchors = None, None
+        with open(args.student_cfg) as cfg_yaml:
+            nc = cfg_yaml["nc"]
+            anchors = cfg_yaml["anchors"]
+
+        student = Model(args.student_cfg, ch=3, nc=nc, anchors=anchors).to(DEVICE)
 
         exit()
