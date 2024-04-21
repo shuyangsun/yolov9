@@ -35,12 +35,22 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    t_coco = DetectMultiBackend(
-        args.teacher_coco, dnn=False, data="data/coco.yaml", fp16=False
+    DEVICE: str = "cuda:0"
+
+    t_coco = (
+        DetectMultiBackend(
+            args.teacher_coco, dnn=False, data="data/coco.yaml", fp16=False
+        )
+        .to(DEVICE)
+        .half()
     )
 
-    t_face = DetectMultiBackend(
-        args.teacher_face, dnn=False, data="data/face.yaml", fp16=False
+    t_face = (
+        DetectMultiBackend(
+            args.teacher_face, dnn=False, data="data/face.yaml", fp16=False
+        )
+        .to(DEVICE)
+        .half()
     )
     t_stride, t_names = t_coco.stride, t_coco.names
     img_size = check_img_size(TEACHER_IMG_SIZE, s=t_stride)  # check image size
@@ -55,7 +65,7 @@ if __name__ == "__main__":
 
     for path, im, im0s, vid_cap, s in dataset:
         im = torch.from_numpy(im).to(t_coco.device)
-        im = im.half() if t_coco.fp16 else im.float()  # uint8 to fp16/32
+        im = im.half().to(DEVICE)
         im /= 255  # 0 - 255 to 0.0 - 1.0
         if len(im.shape) == 3:
             im = im[None]  # expand for batch dim
