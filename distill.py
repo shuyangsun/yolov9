@@ -145,5 +145,6 @@ if __name__ == "__main__":
 
                 # Save results (image with detections)
                 cv2.imwrite(save_path, im0)
+                break
 
         exit()
