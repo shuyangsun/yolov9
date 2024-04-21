@@ -9,12 +9,8 @@ TEACHER_IMG_SIZE: int = 640
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--teacher-model-coco", type=str, help="COCO 80 class .pt model path"
-    )
-    parser.add_argument(
-        "--teacher-model-face", type=str, help="WIDER face .pt model path"
-    )
+    parser.add_argument("--teacher-coco", type=str, help="COCO 80 class .pt model path")
+    parser.add_argument("--teacher-face", type=str, help="WIDER face .pt model path")
     parser.add_argument(
         "--inputs", type=str, nargs="+", help="list of directories of images"
     )
