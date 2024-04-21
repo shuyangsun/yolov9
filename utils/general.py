@@ -695,9 +695,11 @@ def check_amp(model):
     im = (
         f
         if f.exists()
-        else "https://ultralytics.com/images/bus.jpg"
-        if check_online()
-        else np.ones((640, 640, 3))
+        else (
+            "https://ultralytics.com/images/bus.jpg"
+            if check_online()
+            else np.ones((640, 640, 3))
+        )
     )
     try:
         # assert amp_allclose(deepcopy(model), im) or amp_allclose(DetectMultiBackend('yolo.pt', device), im)
@@ -819,9 +821,8 @@ def one_cycle(y1=0.0, y2=1.0, steps=100):
 def one_flat_cycle(y1=0.0, y2=1.0, steps=100):
     # lambda function for sinusoidal ramp from y1 to y2 https://arxiv.org/pdf/1812.01187.pdf
     # return lambda x: ((1 - math.cos(x * math.pi / steps)) / 2) * (y2 - y1) + y1
-    return (
-        lambda x: ((1 - math.cos((x - (steps // 2)) * math.pi / (steps // 2))) / 2)
-        * (y2 - y1)
+    return lambda x: (
+        ((1 - math.cos((x - (steps // 2)) * math.pi / (steps // 2))) / 2) * (y2 - y1)
         + y1
         if (x > (steps // 2))
         else y1
@@ -1139,6 +1140,7 @@ def non_max_suppression(
     labels=(),
     max_det=300,
     nm=0,  # number of masks
+    is_face=False,  # Set to true for face model.
 ):
     """Non-Maximum Suppression (NMS) on inference results to reject overlapping detections
 
@@ -1149,7 +1151,10 @@ def non_max_suppression(
     if isinstance(
         prediction, (list, tuple)
     ):  # YOLO model in validation model, output = (inference_out, loss_out)
-        prediction = prediction[0]  # select only inference output
+        if is_face:
+            prediction = prediction[0][1]
+        else:
+            prediction = prediction[0]  # select only inference output
 
     device = prediction.device
     mps = "mps" in device.type  # Apple MPS

@@ -128,9 +128,9 @@ def run(
             pred = model(im, augment=augment, visualize=visualize)
 
             # DEBUG PRINT
-            print(f"pred[0].shape={pred[0].shape}")
-            print(len(pred[0][0, :, 0]))
-            print(pred[0][0, :, 0])
+            # print(f"pred[0].shape={pred[0].shape}")
+            # print(len(pred[0][0, :, 0]))
+            # print(pred[0][0, :, 0])
 
         # NMS
         with dt[2]:
