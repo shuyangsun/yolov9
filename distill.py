@@ -36,7 +36,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     t_coco = DetectMultiBackend(
-        args.teacher_coco, dnn=False, data="data/coco.yaml", fp16=False
+        args.teacher_coco, dnn=False, data="data/coco.yaml", fp16=True
     )
 
     t_face = DetectMultiBackend(
