@@ -88,14 +88,19 @@ if __name__ == "__main__":
         pred = torch.concatenate([pred_face, pred_coco_filtered[:, 4:, :]], dim=1)
 
         # If any cls confidence is higher than face, replace face bbox with coco bbox.
-        should_override = (
+        # Remove logits for other classes, as they are incorrect distillation knowledge now.
+        should_override_bbox = (
             torch.max(pred_coco_filtered[:, 4:, :], dim=1)[0] > pred_face[:, 4, :]
         ).bool()
-        should_override = torch.reshape(
-            should_override, (args.batch_size, 1, should_override.shape[-1])
+        should_override_bbox = torch.reshape(
+            should_override_bbox, (args.batch_size, 1, should_override_bbox.shape[-1])
         )
-        bbox_override_mask = should_override.repeat(1, 4, 1)
+        bbox_override_mask = should_override_bbox.repeat(1, 4, 1)
         pred[:, :4, :][bbox_override_mask] = pred_coco[:, :4, :][bbox_override_mask]
+        remove_non_face_logits_mask = should_override_bbox.bitwise_not().repeat(
+            1, pred.shape[1] - 5, 1
+        )
+        pred[:, 5:, :][remove_non_face_logits_mask] = 0
 
         # TESTING CODE: Process predictions
         from pathlib import Path
