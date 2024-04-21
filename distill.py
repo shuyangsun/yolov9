@@ -71,6 +71,28 @@ if __name__ == "__main__":
             im = im[None]  # expand for batch dim
         pred_coco = t_coco(im, augment=False, visualize=False)[0]
         pred_face = t_face(im, augment=False, visualize=False)[0][1]
-        print(pred_coco.shape)
-        print(pred_face.shape)
+        pred_coco_filtered = torch.concatenate(
+            [
+                pred_coco[:, 0:4, :],  # bbox
+                pred_coco[:, 5:9, :],  # person,bicycle,car,motorcycle
+                pred_coco[:, 10:11, :],  # bus
+                pred_coco[:, 12:13, :],  # truck
+                pred_coco[:, 21:22, :],  # dog
+                pred_coco[:, 29:32, :],  # backpack,umbrella,handbag
+                pred_coco[:, 33:34, :],  # suitcase
+            ],
+            dim=1,
+        )
+        pred = torch.concatenate([pred_face, pred_coco_filtered], dim=1)
+
+        # If any cls confidence is higher than face, replace face bbox with coco bbox.
+        should_override = (
+            torch.max(pred_coco_filtered[:, 4:, :], dim=1)[0] > pred_face[:, 4, :]
+        ).bool()
+        should_override = torch.reshape(
+            should_override, (args.batch_size, 1, should_override.shape[-1])
+        )
+        bbox_override_mask = should_override.repeat(1, 4, 1)
+        pred[:, :4, :][bbox_override_mask] = pred_coco[:, :4, :][bbox_override_mask]
+        print(pred.shape)
         exit()
