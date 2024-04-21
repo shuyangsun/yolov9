@@ -25,16 +25,22 @@ if __name__ == "__main__":
         help="Path to student config, must be one of the files in models/detect",
     )
     parser.add_argument(
+        "--batch-size",
+        type=int,
+        required=True,
+        help="Batch size per iteration.",
+    )
+    parser.add_argument(
         "--inputs", type=str, nargs="+", help="list of directories of images"
     )
     args = parser.parse_args()
 
     t_coco = DetectMultiBackend(
-        args.teacher_coco, dnn=False, data="data/coco.yaml", fp16=True
+        args.teacher_coco, dnn=False, data="data/coco.yaml", fp16=False
     )
 
     t_face = DetectMultiBackend(
-        args.teacher_face, dnn=False, data="data/face.yaml", fp16=True
+        args.teacher_face, dnn=False, data="data/face.yaml", fp16=False
     )
     t_stride, t_names = t_coco.stride, t_coco.names
     img_size = check_img_size(TEACHER_IMG_SIZE, s=t_stride)  # check image size
@@ -43,6 +49,9 @@ if __name__ == "__main__":
         path=args.inputs,
         img_size=img_size,
     )
+
+    t_coco.warmup(imgsz=(args.batch_size, 3, img_size, img_size))  # warmup
+    t_face.warmup(imgsz=(args.batch_size, 3, img_size, img_size))  # warmup
 
     for path, im, im0s, vid_cap, s in dataset:
         im = torch.from_numpy(im).to(t_coco.device)
