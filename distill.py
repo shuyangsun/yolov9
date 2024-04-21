@@ -45,6 +45,7 @@ if __name__ == "__main__":
         )
         .to(DEVICE)
         .half()
+        .eval()
     )
 
     t_face = (
@@ -53,6 +54,7 @@ if __name__ == "__main__":
         )
         .to(DEVICE)
         .half()
+        .eval()
     )
     t_stride, t_names = t_coco.stride, t_coco.names
     img_size = check_img_size(TEACHER_IMG_SIZE, s=t_stride)  # check image size
@@ -148,11 +150,17 @@ if __name__ == "__main__":
                 cv2.imwrite(save_path, im0)
                 break
 
-        nc, anchors = None, None
-        with open(args.student_cfg) as cfg_yaml:
-            nc = cfg_yaml["nc"]
-            anchors = cfg_yaml["anchors"]
+        student_cfg = None
+        with open(args.student_cfg, errors="ignore") as f:
+            student_cfg = yaml.safe_load(f)
+        nc = student_cfg.get("nc")
+        anchors = student_cfg.get("anchors")
 
-        student = Model(args.student_cfg, ch=3, nc=nc, anchors=anchors).to(DEVICE)
+        student = (
+            Model(args.student_cfg, ch=3, nc=nc, anchors=anchors)
+            .to(DEVICE)
+            .half()
+            .train()
+        )
 
         exit()
