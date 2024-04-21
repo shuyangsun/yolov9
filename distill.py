@@ -76,11 +76,11 @@ if __name__ == "__main__":
         pred_coco_filtered = torch.cat(
             [
                 pred_coco[:, 0:9, :],  # bbox,person,bicycle,car,motorcycle
-                pred_coco[:, 10:11, :],  # bus
-                pred_coco[:, 12:13, :],  # truck
-                pred_coco[:, 21:22, :],  # dog
-                pred_coco[:, 29:32, :],  # backpack,umbrella,handbag
-                pred_coco[:, 33:34, :],  # suitcase
+                pred_coco[:, 9:10, :],  # bus
+                pred_coco[:, 11:12, :],  # truck
+                pred_coco[:, 20:21, :],  # dog
+                pred_coco[:, 28:31, :],  # backpack,umbrella,handbag
+                pred_coco[:, 32:33, :],  # suitcase
             ],
             dim=1,
         )
