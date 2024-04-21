@@ -2,6 +2,7 @@ import argparse
 import torch
 
 from models.common import DetectMultiBackend
+from models.yolo import Model
 from utils.dataloaders import LoadImages
 from utils.general import check_img_size
 
@@ -103,43 +104,46 @@ if __name__ == "__main__":
         pred[:, 5:, :][remove_non_face_logits_mask] = 0
 
         # TESTING CODE: Process predictions
-        from pathlib import Path
-        from utils.general import scale_boxes, cv2, non_max_suppression
-        from utils.plots import Annotator, colors
+        if True:
+            from pathlib import Path
+            from utils.general import scale_boxes, cv2, non_max_suppression
+            from utils.plots import Annotator, colors
 
-        pred = non_max_suppression(pred, 0.25, 0.45, None, False, max_det=1000)
-        print(pred[0].shape)
+            pred = non_max_suppression(pred, 0.25, 0.45, None, False, max_det=1000)
+            print(pred[0].shape)
 
-        for i, det in enumerate(pred):  # per image
-            p, im0, frame = path, im0s.copy(), getattr(dataset, "frame", 0)
+            for i, det in enumerate(pred):  # per image
+                p, im0, frame = path, im0s.copy(), getattr(dataset, "frame", 0)
 
-            p = Path(p)  # to Path
-            save_path = "/home/ssun/Desktop/distill_test.jpg"
-            s += "%gx%g " % im.shape[2:]  # print string
-            gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
-            imc = im0
-            names = t_coco.names
-            annotator = Annotator(im0, line_width=3, example=str(names))
-            if len(det):
-                # Rescale boxes from img_size to im0 size
-                det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
+                p = Path(p)  # to Path
+                save_path = "/home/ssun/Desktop/distill_test.jpg"
+                s += "%gx%g " % im.shape[2:]  # print string
+                gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+                imc = im0
+                names = t_coco.names
+                annotator = Annotator(im0, line_width=3, example=str(names))
+                if len(det):
+                    # Rescale boxes from img_size to im0 size
+                    det[:, :4] = scale_boxes(
+                        im.shape[2:], det[:, :4], im0.shape
+                    ).round()
 
-                # Print results
-                for c in det[:, 5].unique():
-                    n = (det[:, 5] == c).sum()  # detections per class
-                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                    # Print results
+                    for c in det[:, 5].unique():
+                        n = (det[:, 5] == c).sum()  # detections per class
+                        s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
-                # Write results
-                for *xyxy, conf, cls in reversed(det):
+                    # Write results
+                    for *xyxy, conf, cls in reversed(det):
 
-                    c = int(cls)  # integer class
-                    label = f"{names[c]} {conf:.2f}"
-                    annotator.box_label(xyxy, label, color=colors(c, True))
+                        c = int(cls)  # integer class
+                        label = f"{names[c]} {conf:.2f}"
+                        annotator.box_label(xyxy, label, color=colors(c, True))
 
-            # Stream results
-            im0 = annotator.result()
+                # Stream results
+                im0 = annotator.result()
 
-            # Save results (image with detections)
-            cv2.imwrite(save_path, im0)
+                # Save results (image with detections)
+                cv2.imwrite(save_path, im0)
 
         exit()
