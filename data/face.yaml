@@ -1,0 +1,8 @@
+path: datasets/face
+train: train
+val: val
+
+
+# Classes
+names:
+  0: face
