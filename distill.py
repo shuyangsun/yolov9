@@ -9,24 +9,32 @@ TEACHER_IMG_SIZE: int = 640
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--teacher-coco", type=str, help="COCO 80 class .pt model path")
-    parser.add_argument("--teacher-face", type=str, help="WIDER face .pt model path")
     parser.add_argument(
-        "--inputs", type=str, nargs="+", help="list of directories of images"
+        "--teacher-coco",
+        type=str,
+        required=True,
+        help="Path to COCO 80 class .pt model.",
     )
     parser.add_argument(
-        "--student-config",
+        "--teacher-face", type=str, required=True, help="Path to face .pt model."
+    )
+    parser.add_argument(
+        "--student-cfg",
         type=str,
-        help="name of student config, must be one of the file names in models/detect",
+        required=True,
+        help="Path to student config, must be one of the files in models/detect",
+    )
+    parser.add_argument(
+        "--inputs", type=str, nargs="+", help="list of directories of images"
     )
     args = parser.parse_args()
 
     t_coco = DetectMultiBackend(
-        args.teacher_model_coco, dnn=False, data="data/coco.yaml", fp16=True
+        args.teacher_coco, dnn=False, data="data/coco.yaml", fp16=True
     )
 
     t_face = DetectMultiBackend(
-        args.teacher_model_face, dnn=False, data="data/face.yaml", fp16=True
+        args.teacher_face, dnn=False, data="data/face.yaml", fp16=True
     )
     t_stride, t_names = t_coco.stride, t_coco.names
     img_size = check_img_size(TEACHER_IMG_SIZE, s=t_stride)  # check image size
